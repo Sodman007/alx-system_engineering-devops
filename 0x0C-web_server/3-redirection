@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Update package lists
+sudo apt update
+
+# Install Nginx
+sudo apt install -y nginx
+
+# Verify if Nginx is installed successfully
+if [ $(dpkg-query -W -f='${Status}' nginx 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+    echo "Nginx installation failed. Exiting."
+    exit 1
+fi
+
+# Create a simple HTML file with the redirection message
+echo "<!DOCTYPE html>
+<html>
+<head>
+<title>301 Moved Permanently</title>
+</head>
+<body>
+<h1>301 Moved Permanently</h1>
+<p>The document has moved <a href=\"https://www.example.com\">here</a>.</p>
+</body>
+</html>" | sudo tee /var/www/html/redirect_me.html > /dev/null
+
+# Configure Nginx to listen on port 80 and serve the redirection page
+sudo tee /etc/nginx/sites-available/default > /dev/null << EOL
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html;
+    server_name _;
+
+    location /redirect_me {
+        return 301 https://www.example.com;
+    }
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOL
+
+# Restart Nginx gracefully without using systemctl
+sudo nginx -s reload
+
+echo "Nginx has been installed and configured with redirection successfully."

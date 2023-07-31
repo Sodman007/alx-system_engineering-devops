@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# Update package lists
+sudo apt update
+
+# Install Nginx
+sudo apt install -y nginx
+
+# Verify if Nginx is installed successfully
+if [ $(dpkg-query -W -f='${Status}' nginx 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+    echo "Nginx installation failed. Exiting."
+    exit 1
+fi
+
+# Create a simple HTML file with "Hello World!" message
+echo "<!DOCTYPE html>
+<html>
+<head>
+<title>Hello World!</title>
+</head>
+<body>
+<h1>Hello World!</h1>
+</body>
+</html>" | sudo tee /var/www/html/index.html > /dev/null
+
+# Configure Nginx to listen on port 80 and serve the created HTML file
+sudo tee /etc/nginx/sites-available/default > /dev/null << EOL
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html;
+    server_name _;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOL
+
+# Restart Nginx gracefully without using systemctl
+sudo nginx -s reload
+
+echo "Nginx has been installed and configured successfully."
