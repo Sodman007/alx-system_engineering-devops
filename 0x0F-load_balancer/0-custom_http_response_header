@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+# Update package lists
+sudo apt update
+
+# Install Nginx
+sudo apt install -y nginx
+
+# Verify if Nginx is installed successfully
+if [ $(dpkg-query -W -f='${Status}' nginx 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+    echo "Nginx installation failed. Exiting."
+    exit 1
+fi
+
+# Create a simple HTML file with "Hello World!" message
+echo "<!DOCTYPE html>
+<html>
+<head>
+<title>Hello World!</title>
+</head>
+<body>
+<h1>Hello World!</h1>
+</body>
+</html>" | sudo tee /var/www/html/index.html > /dev/null
+
+# Create a custom Nginx configuration file for the custom HTTP response header
+cat <<EOL | sudo tee /etc/nginx/conf.d/custom_header.conf > /dev/null
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html;
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    # Add custom HTTP response header
+    add_header X-Served-By \$hostname;
+}
+EOL
+
+# Remove default Nginx configuration files
+sudo rm /etc/nginx/sites-enabled/default
+
+# Restart Nginx to apply the changes
+sudo systemctl restart nginx
+
+echo "Nginx has been installed and configured with custom HTTP response header successfully."

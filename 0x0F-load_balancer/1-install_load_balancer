@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Update package lists
+sudo apt update
+
+# Install HAproxy
+sudo apt install -y haproxy
+
+# Verify if HAproxy is installed successfully
+if [ $(dpkg-query -W -f='${Status}' haproxy 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+    echo "HAproxy installation failed. Exiting."
+    exit 1
+fi
+
+# Configure HAproxy to send traffic to web-01 and web-02
+cat <<EOL | sudo tee /etc/haproxy/haproxy.cfg > /dev/null
+frontend web_frontend
+    bind *:80
+    mode http
+    default_backend web_backend
+
+backend web_backend
+    mode http
+    balance roundrobin
+    server web-01 [212815]-web-01:80 check
+    server web-02 [212815]-web-02:80 check
+EOL
+
+# Enable HAproxy to be managed via init script
+sudo sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
+
+# Restart HAproxy service
+sudo service haproxy restart
+
+echo "HAproxy has been installed and configured successfully."
