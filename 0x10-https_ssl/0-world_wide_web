@@ -42,3 +42,4 @@ else
     # Display information for the specified subdomain
     display_subdomain_info "$domain" "$subdomain"
 fi
+
