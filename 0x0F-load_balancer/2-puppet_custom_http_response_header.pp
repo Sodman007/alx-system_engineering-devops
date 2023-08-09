@@ -1,3 +1,4 @@
+#creating a custom HTTP header response with Puppet
 # 2-puppet_custom_http_response_header.pp
 
 # Install Nginx package
