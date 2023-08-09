@@ -1,0 +1,12 @@
+# /etc/ufw/before.rules
+
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Port forwarding rule
+-A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+
+# Don't delete the 'COMMIT' line or these rules won't be processed
+COMMIT
