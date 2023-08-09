@@ -1,5 +1,5 @@
 # nginx_config.pp
-
+#configuring my server with Puppet
 # Install Nginx package
 package { 'nginx':
   ensure => installed,

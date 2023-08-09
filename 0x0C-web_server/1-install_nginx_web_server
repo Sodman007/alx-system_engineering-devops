@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+#Install nginx on my web-01 server
 # Update package lists
 sudo apt update
 
