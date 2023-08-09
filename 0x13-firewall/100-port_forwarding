@@ -1,5 +1,5 @@
 # /etc/ufw/before.rules
-
+#Configure web-01 so that its firewall redirects port 8080/TCP to port 80/TCP
 *nat
 :PREROUTING ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
