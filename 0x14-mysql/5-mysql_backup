@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# Check if the password argument is provided
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <mysql_root_password>"
+  exit 1
+fi
+
+# Get the current date in the required format (day-month-year)
+current_date=$(date +"%d-%m-%Y")
+
+# MySQL root user and password
+mysql_user="root"
+mysql_password="$1"
+
+# Name of the MySQL dump file
+dump_file="backup.sql"
+
+# Name of the compressed archive
+archive_name="$current_date.tar.gz"
+
+# Directory to store the dump and archive
+backup_dir="/home/ubuntu/mysql_backups"  # Change this to the desired backup directory
+
+# Create the backup directory if it doesn't exist
+mkdir -p "$backup_dir"
+
+# Generate MySQL dump
+mysqldump -u "$mysql_user" -p"$mysql_password" --all-databases > "$backup_dir/$dump_file"
+
+# Compress the dump file into a tar.gz archive
+tar -czvf "$backup_dir/$archive_name" -C "$backup_dir" "$dump_file"
+
+echo "Backup completed: $archive_name"
